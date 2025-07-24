@@ -39,4 +39,3 @@ startup.sh.tpl.*
 .DS_Store
 Thumbs.db
 
-.vagrant/
