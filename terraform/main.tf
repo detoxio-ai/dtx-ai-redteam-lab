@@ -33,6 +33,7 @@ data "template_file" "startup" {
   vars = {
     username       = var.username
     ssh_public_key = var.ssh_public_key
+    secrets_json   = var.secrets_json
   }
 }
 

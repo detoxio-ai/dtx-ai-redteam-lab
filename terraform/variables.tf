@@ -80,4 +80,22 @@ variable "instance_count" {
   default = 2
 }
 
+variable "prefix" {
+  type        = string
+  description = "Prefix for naming resources"
+  default     = "dtx"
+}
+
+variable "allowed_ports" {
+  type        = list(number)
+  description = "List of ports to open for ingress"
+  default     = [22, 80, 443]
+}
+
+variable "secrets_json" {
+  type        = map(string)
+  description = "Map of secret keys and values to write to VM"
+  sensitive   = true
+}
+
 
