@@ -77,7 +77,7 @@ variable "service_account_scopes" {
 
 variable "instance_count" {
   type    = number
-  default = 2
+  default = 1
 }
 
 variable "prefix" {
