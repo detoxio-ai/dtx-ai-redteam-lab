@@ -9,7 +9,7 @@ REPO_URL="https://github.com/vxcontrol/pentagi.git"
 REPO_DIR="$LABS_DIR/pentagi"
 SECRETS_DIR="$HOME/.secrets"
 OPENAI_FILE="$SECRETS_DIR/OPENAI_API_KEY.txt"
-ENV_TEMPLATE=".env.template"
+ENV_TEMPLATE=".env.example"
 ENV_FILE=".env"
 
 # Create labs directory

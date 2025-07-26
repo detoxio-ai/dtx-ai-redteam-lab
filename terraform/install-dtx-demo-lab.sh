@@ -13,7 +13,6 @@ SECRETS_DIR="$HOME/.secrets"
 # API key files
 OPENAI_FILE="$SECRETS_DIR/OPENAI_API_KEY.txt"
 GROQ_FILE="$SECRETS_DIR/GROQ_API_KEY.txt"
-ANTHROPIC_FILE="$SECRETS_DIR/ANTHROPIC_API_KEY.txt"
 
 # Clone repository if needed
 mkdir -p "$LABS_DIR"
@@ -54,7 +53,6 @@ update_env_var() {
 echo "🔐 Injecting API keys into .env..."
 [ -f "$OPENAI_FILE" ]     && update_env_var "OPENAI_API_KEY"     "$(cat "$OPENAI_FILE")"
 [ -f "$GROQ_FILE" ]       && update_env_var "GROQ_API_KEY"       "$(cat "$GROQ_FILE")"
-[ -f "$ANTHROPIC_FILE" ]  && update_env_var "ANTHROPIC_API_KEY"  "$(cat "$ANTHROPIC_FILE")"
 
 # Start and stop containers to pull images
 echo "🐳 Starting Docker containers to preload images..."

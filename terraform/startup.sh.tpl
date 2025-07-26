@@ -112,7 +112,7 @@ export PATH="$HOME/.ollama/bin:$PATH"
 EOF
 
 # === Write Generic Secrets ===
-SECRETS_DIR="/home/$USER/dtx/.secrets"
+SECRETS_DIR="/home/$USER/.secrets"
 mkdir -p "$SECRETS_DIR"
 
 %{ for key, value in secrets_json ~}
