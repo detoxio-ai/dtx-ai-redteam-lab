@@ -62,8 +62,6 @@ locals {
     username       = var.username
     ssh_public_key = var.ssh_public_key
     secrets_json   = var.secrets_json
-    install_dtx_demo_lab_script = file("${path.module}/install-dtx-demo-lab.sh")
-    install_pentagi_script = file("${path.module}/install-pentagi.sh")
   })
 }
 
@@ -114,5 +112,30 @@ resource "google_compute_firewall" "allow_custom_ports" {
 
   source_ranges = var.ssh_source_ranges  # ["0.0.0.0/0"] by default
   target_tags   = ["ssh"]
+}
+
+
+# -------- INSTALL REMOTE LAB --------
+resource "null_resource" "copy_install_scripts" {
+  count = var.instance_count
+
+  depends_on = [google_compute_instance.vm]
+
+  connection {
+    type        = "ssh"
+    user        = var.username
+    private_key = file("id_ed25519")
+    host        = google_compute_instance.vm[count.index].network_interface[0].access_config[0].nat_ip
+  }
+
+  provisioner "file" {
+    source      = "install-dtx-demo-lab.sh"
+    destination = "/home/${var.username}/install-dtx-demo-lab.sh"
+  }
+
+  provisioner "file" {
+    source      = "install-pentagi.sh"
+    destination = "/home/${var.username}/install-pentagi.sh"
+  }
 }
 

@@ -126,14 +126,13 @@ chmod 700 "$SECRETS_DIR"
 chmod 600 "$SECRETS_DIR"/*.txt
 
 
-# --- RUN LAB SETUP INLINE ---
-#echo "Running DTX Docker Lab Checkout Script..."
-sudo -u $USER bash -c 'bash -s' <<'EOF' >> /var/log/install-dtx-demo-lab.log 2>&1
-${install_dtx_demo_lab_script}
-EOF
+# === Run install scripts ===
+if [ -f "/home/$USER/install-dtx-demo-lab.sh" ]; then
+  chmod +x "/home/$USER/install-dtx-demo-lab.sh"
+  sudo -u "$USER" bash "/home/$USER/install-dtx-demo-lab.sh" || true
+fi
 
-# --- RUN Pentagi SETUP INLINE ---
-#echo "Running DTX Docker Lab Checkout Script..."
-sudo -u $USER bash -c 'bash -s' <<'EOF' >> /var/log/install_pentagi_script.log 2>&1
-${install_pentagi_script}
-EOF
+if [ -f "/home/$USER/install-pentagi.sh" ]; then
+  chmod +x "/home/$USER/install-pentagi.sh"
+  sudo -u "$USER" bash "/home/$USER/install-pentagi.sh" || true
+fi
