@@ -11,6 +11,9 @@ output "internal_ips" {
 }
 
 output "ssh_commands" {
-  value = [for ip in google_compute_instance.vm[*].network_interface[0].access_config[0].nat_ip : "ssh -i id_ed25519 dtx@${ip}"]
+  value = [
+    for ip in google_compute_instance.vm[*].network_interface[0].access_config[0].nat_ip :
+    "ssh -i id_ed25519 ${var.username}@${ip}"
+  ]
 }
 

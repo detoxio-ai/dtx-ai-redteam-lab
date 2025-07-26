@@ -1,14 +1,29 @@
-project_id        = "my-gcp-project"
-region            = "us-central1"
-zone              = "us-central1-a"
+# --- GCP Project & Region ---
+project_id = "my-gcp-project"
+region     = "us-central1"
+zone       = "us-central1-a"
 
-# Choose ONE path:
-machine_type      = "e2-standard-2"   # preset
+# --- VM Sizing (Choose ONE path) ---
+machine_type      = "e2-standard-2"   # e.g. e2-standard-2, n2-standard-4
 # custom_vcpus    = 2
-# custom_memory_mb = 4096
+# custom_memory_mb = 4096             # Must be multiple of 256
 
-disk_size_gb      = 50
-username          = "dtx"
-ssh_public_key    = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIYourKeyHere user@laptop"
-ssh_source_ranges = ["203.0.113.0/24"] # Example office CIDR
+disk_size_gb = 50
 
+# --- Access ---
+username       = "dtx"
+ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIYourKeyHere user@laptop"
+ssh_source_ranges = ["203.0.113.0/24"]  # Example: restrict to office IP range
+
+# --- Resource Naming ---
+prefix = "emerson"
+
+# --- Ingress Ports to Allow ---
+allowed_ports = [22, 80, 443]
+
+# --- Secrets to Inject into VM ---
+secrets_json = {
+  "OPENAI_API_KEY"     = "your-openai-key-here"
+  "GROQ_API_KEY"       = "your-groq-key-here"
+  "ANTHROPIC_API_KEY"  = "your-anthropic-key-here"
+}

@@ -53,11 +53,6 @@ variable "ssh_public_key" {
   description = "Your SSH public key (ssh-ed25519 or ssh-rsa...)"
 }
 
-variable "network" {
-  type    = string
-  default = "default"
-}
-
 variable "ssh_source_ranges" {
   type    = list(string)
   default = ["0.0.0.0/0"] # tighten this!

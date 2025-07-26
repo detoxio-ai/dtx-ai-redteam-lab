@@ -12,34 +12,64 @@ provider "google" {
   project = var.project_id
   region  = var.region
   zone    = var.zone
-  # Uses Application Default Credentials by default (gcloud auth application-default login)
 }
 
-# Grab the latest Ubuntu 22.04 LTS image
+# -------- VPC + NAT SETUP --------
+
+resource "google_compute_network" "vpc" {
+  name                    = "${var.prefix}-workshop-vpc"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnet" {
+  name                     = "${var.prefix}-workshop-subnet"
+  region                   = var.region
+  network                  = google_compute_network.vpc.id
+  ip_cidr_range            = "10.10.0.0/16"
+  private_ip_google_access = true
+}
+
+resource "google_compute_router" "router" {
+  name    = "${var.prefix}-workshop-router"
+  region  = var.region
+  network = google_compute_network.vpc.id
+}
+
+resource "google_compute_router_nat" "nat" {
+  name                               = "${var.prefix}-workshop-nat"
+  router                             = google_compute_router.router.name
+  region                             = var.region
+  nat_ip_allocate_option             = "AUTO_ONLY"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+}
+
+# -------- IMAGE --------
+
 data "google_compute_image" "ubuntu" {
   family  = "ubuntu-2204-lts"
   project = "ubuntu-os-cloud"
 }
 
-# Decide machine type (predefined vs custom)
+# -------- STARTUP SCRIPT --------
 locals {
-  machine_type = (var.custom_vcpus != null && var.custom_memory_mb != null) ? "custom-${var.custom_vcpus}-${var.custom_memory_mb}" : var.machine_type
-}
+  machine_type = (
+    var.custom_vcpus != null && var.custom_memory_mb != null
+    ? "custom-${var.custom_vcpus}-${var.custom_memory_mb}"
+    : var.machine_type
+  )
 
-
-# Render startup script to create the user & inject key
-data "template_file" "startup" {
-  template = file("${path.module}/startup.sh.tpl")
-  vars = {
+  startup_script = templatefile("${path.module}/startup.sh.tpl", {
     username       = var.username
     ssh_public_key = var.ssh_public_key
     secrets_json   = var.secrets_json
-  }
+  })
 }
+
+# -------- VM INSTANCE --------
 
 resource "google_compute_instance" "vm" {
   count        = var.instance_count
-  name         = "dtx-vm-${count.index + 1}"
+  name         = "${var.prefix}-vm-${count.index + 1}"
   machine_type = local.machine_type
   zone         = var.zone
   tags         = ["ssh"]
@@ -53,7 +83,8 @@ resource "google_compute_instance" "vm" {
   }
 
   network_interface {
-    network       = var.network
+    network    = google_compute_network.vpc.id
+    subnetwork = google_compute_subnetwork.subnet.id
     access_config {}
   }
 
@@ -61,7 +92,7 @@ resource "google_compute_instance" "vm" {
     block-project-ssh-keys = "true"
   }
 
-  metadata_startup_script = data.template_file.startup.rendered
+  metadata_startup_script = local.startup_script
 
   service_account {
     email  = var.service_account_email
@@ -69,18 +100,17 @@ resource "google_compute_instance" "vm" {
   }
 }
 
-
-# Simple firewall to allow SSH from anywhere (lock this down for prod!)
-resource "google_compute_firewall" "ssh" {
-  name    = "${var.name}-allow-ssh"
-  network = var.network
+# -------- FIREWALL RULES --------
+resource "google_compute_firewall" "allow_custom_ports" {
+  name    = "${var.prefix}-allow-ports"
+  network = google_compute_network.vpc.id
 
   allow {
     protocol = "tcp"
-    ports    = ["22"]
+    ports    = [for port in var.allowed_ports : tostring(port)]
   }
 
-  source_ranges = var.ssh_source_ranges
+  source_ranges = var.ssh_source_ranges  # ["0.0.0.0/0"] by default
   target_tags   = ["ssh"]
 }
 
