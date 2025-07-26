@@ -128,8 +128,8 @@ chmod 600 "$SECRETS_DIR"/*.txt
 
 # --- RUN LAB SETUP INLINE ---
 #echo "Running DTX Docker Lab Checkout Script..."
-sudo -u $USER bash -c 'bash -s' <<'EOF' >> /var/log/dtx_docker_lab_checkout.log 2>&1
-${dtx_docker_lab_checkout_script}
+sudo -u $USER bash -c 'bash -s' <<'EOF' >> /var/log/install-dtx-demo-lab.log 2>&1
+${install_dtx_demo_lab_script}
 EOF
 
 # --- RUN Pentagi SETUP INLINE ---

@@ -62,7 +62,7 @@ locals {
     username       = var.username
     ssh_public_key = var.ssh_public_key
     secrets_json   = var.secrets_json
-    dtx_docker_lab_checkout_script = file("${path.module}/dtx_docker_lab_checkout.sh")
+    install_dtx_demo_lab_script = file("${path.module}/install-dtx-demo-lab.sh")
     install_pentagi_script = file("${path.module}/install-pentagi.sh")
   })
 }
