@@ -121,18 +121,40 @@ ${value}
 EOF
 %{ endfor ~}
 
-chown -R $USER:$USER "/home/$USER/dtx"
+chown -R $USER:$USER "/home/$USER/"
 chmod 700 "$SECRETS_DIR"
 chmod 600 "$SECRETS_DIR"/*.txt
 
 
-# === Run install scripts ===
-if [ -f "/home/$USER/install-dtx-demo-lab.sh" ]; then
-  chmod +x "/home/$USER/install-dtx-demo-lab.sh"
-  sudo -u "$USER" bash "/home/$USER/install-dtx-demo-lab.sh" || true
+# === Move and run install-dtx-demo-lab.sh ===
+LABS_DIR="/home/$USER/labs"
+REPO_URL="https://github.com/detoxio-ai/ai-red-teaming-training.git"
+
+sudo -u "$USER" bash -c "
+  mkdir -p '$LABS_DIR'
+  cd '$LABS_DIR'
+  git clone '$REPO_URL'
+"
+
+# === Run install-dtx-demo-lab.sh from repo ===
+REPO_DIR="/home/$USER/labs/ai-red-teaming-training"
+INSTALL_DIR="$REPO_DIR/lab/terraform/tools"
+
+if [ -f "$INSTALL_DIR/install-dtx-demo-lab.sh" ]; then
+  echo "🚀 Running install-dtx-demo-lab.sh"
+  chmod +x "$INSTALL_DIR/install-dtx-demo-lab.sh"
+  sudo -u "$USER" bash "$INSTALL_DIR/install-dtx-demo-lab.sh" || true
 fi
 
-if [ -f "/home/$USER/install-pentagi.sh" ]; then
-  chmod +x "/home/$USER/install-pentagi.sh"
-  sudo -u "$USER" bash "/home/$USER/install-pentagi.sh" || true
+if [ -f "$INSTALL_DIR/install-pentagi.sh" ]; then
+  echo "🚀 Running install-pentagi.sh"
+  chmod +x "$INSTALL_DIR/install-pentagi.sh"
+  sudo -u "$USER" bash "$INSTALL_DIR/install-pentagi.sh" || true
 fi
+
+if [ -f "$INSTALL_DIR/install-vulnhub-lab.sh" ]; then
+  echo "🚀 Running install-vulnhub-lab.sh"
+  chmod +x "$INSTALL_DIR/install-vulnhub-lab.sh"
+  sudo -u "$USER" bash "$INSTALL_DIR/install-vulnhub-lab.sh" || true
+fi
+
