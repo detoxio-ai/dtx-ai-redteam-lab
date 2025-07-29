@@ -63,7 +63,7 @@ sudo -u $USER bash -c 'bash -lc "source \$HOME/.local/bin/env && uv python insta
 # === Python Tools via uv ===
 sudo -u $USER bash -c 'bash -lc "
   source \$HOME/.local/bin/env
-  uv tool install \"dtx[torch]\"
+  uv tool install \"dtx[torch]>=0.25.0\"
   uv tool install \"garak\"
   uv tool install \"textattack[tensorflow]\"
   uv tool install \"huggingface_hub[cli,torch]\"
@@ -184,6 +184,7 @@ sudo -u $USER bash -c 'bash -lc "
 "'
 
 sudo -u $USER bash -c 'bash -lc "
+  source \$HOME/.bashrc
   # Install AutoGenStudio via uv
   echo \"🚀 Installing autogenstudio via uv...\"
   uv tool install autogenstudio
