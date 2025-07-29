@@ -150,6 +150,14 @@ for script in install-dtx-demo-lab.sh install-pentagi.sh install-vulnhub-lab.sh;
   fi
 done
 
+# === Copy validate_installation.sh if exists ===
+VALIDATE_SCRIPT="$INSTALL_DIR/../validate_installation.sh"
+if [ -f "$VALIDATE_SCRIPT" ]; then
+  cp "$VALIDATE_SCRIPT" "/home/$USER/validate_installation.sh"
+  chown "$USER:$USER" "/home/$USER/validate_installation.sh"
+  echo "✅ Copied validate_installation.sh to /home/$USER/"
+fi
+
 # === Install Go via ASDF and tools into ~/.local/bin ===
 sudo -u $USER bash -c 'bash -lc "
   . \$HOME/.asdf/asdf.sh
