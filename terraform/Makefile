@@ -62,6 +62,17 @@ ssh-all:
 		ssh -i id_ed25519 -o IdentitiesOnly=yes dtx@$$ip 'hostname && whoami'; \
 	done
 
+# === Port Forwarding ===
+port-forward:
+ifndef PORT
+	$(error ❌ Please provide PORT. Usage: make port-forward PORT=8000)
+endif
+	@terraform -chdir=$(PROJECT_DIR) workspace select $(WORKSPACE) >/dev/null || terraform -chdir=$(PROJECT_DIR) workspace new $(WORKSPACE)
+	@first_ip=$$(terraform -chdir=$(PROJECT_DIR) output -json public_ips | jq -r '.[0]'); \
+	echo "🔁 Forwarding remote port $$first_ip:$(PORT) to localhost:$(PORT)..."; \
+	ssh -i id_ed25519 -o IdentitiesOnly=yes -N -L $(PORT):localhost:$(PORT) dtx@$$first_ip
+
+
 # === Terraform Workspace Management ===
 workspace-list:
 	@terraform -chdir=$(PROJECT_DIR) workspace list

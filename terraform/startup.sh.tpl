@@ -129,6 +129,20 @@ chown -R $USER:$USER "/home/$USER/"
 chmod 700 "$SECRETS_DIR"
 chmod 600 "$SECRETS_DIR"/*.txt
 
+# === Export API Keys from Secrets in .bashrc ===
+cat >> /home/$USER/.bashrc <<'EOF'
+
+# === Export API keys from secrets directory ===
+if [ -f "$HOME/.secrets/OPENAI_API_KEY.txt" ]; then
+  export OPENAI_API_KEY=$(cat "$HOME/.secrets/OPENAI_API_KEY.txt")
+fi
+
+if [ -f "$HOME/.secrets/GROQ_API_KEY.txt" ]; then
+  export GROQ_API_KEY=$(cat "$HOME/.secrets/GROQ_API_KEY.txt")
+fi
+EOF
+
+
 # === Move and run install-dtx-demo-lab.sh ===
 LABS_DIR="/home/$USER/labs"
 REPO_URL="https://github.com/detoxio-ai/ai-red-teaming-training.git"
@@ -183,12 +197,92 @@ sudo -u $USER bash -c 'bash -lc "
 # === Install Nmap ===
 sudo apt-get install -y nmap
 
+# === Install Tmux ===
+sudo -u "$USER" bash -c 'bash -lc "
+  echo \"🧰 Installing tmux...\"
+  sudo apt-get install -y tmux
+
+  echo \"📝 Writing .tmux.conf with Ctrl+Shift arrow navigation only...\"
+  cat <<EOF > \$HOME/.tmux.conf
+# --- Vim-style navigation ---
+bind h select-pane -L
+bind j select-pane -D
+bind k select-pane -U
+bind l select-pane -R
+
+# --- Ctrl+Shift+Arrow keys ---
+# These escape sequences work in terminals that support them
+bind -n C-S-Left select-pane -L
+bind -n C-S-Right select-pane -R
+bind -n C-S-Up select-pane -U
+bind -n C-S-Down select-pane -D
+
+# --- Mouse support ---
+set -g mouse on
+
+# --- Better visuals (optional) ---
+set -g status-bg colour235
+set -g status-fg white
+set -g pane-border-style fg=white
+set -g pane-active-border-style fg=brightgreen
+
+# Increase scrollback history size
+set -g history-limit 100000
+EOF
+
+  echo \"🔄 Reloading tmux config if in session...\"
+  tmux has-session 2>/dev/null && tmux source-file \$HOME/.tmux.conf || true
+
+  echo \"✅ tmux installed and configured with Ctrl+Shift arrow navigation only.\"
+"'
+
+
+# === Install Pentestgpt ===
+sudo -u "$USER" bash -lc '
+# Temporary directory for cloning PentestGPT
+TMP_DIR="$(mktemp -d)"
+git clone --depth=1 https://github.com/GreyDGL/PentestGPT "$TMP_DIR/PentestGPT"
+
+# Remove broken submodule reference
+rm -rf "$TMP_DIR/PentestGPT/benchmark"
+
+# Install using uv from local path
+uv tool install "$TMP_DIR/PentestGPT"
+
+# Clean up temporary directory
+rm -rf "$TMP_DIR"
+'
+
+
+# === Install CAI and other tools ===
+sudo -u $USER bash -c 'bash -lc "
+  source \$HOME/.local/bin/env
+  uv tool install \"cai-framework\"
+"'
+
+## Install Reaper and other tools
+for script in install-reaper.sh; do
+  if [ -f "$INSTALL_DIR/$script" ]; then
+    echo "🚀 Running $script"
+    chmod +x "$INSTALL_DIR/$script"
+    sudo -u "$USER" bash "$INSTALL_DIR/$script" || true
+  fi
+done
+
+
+
+
 # === Install Metasploit ===
 sudo -u $USER bash -c 'bash -lc "
   curl -sSL https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > msfinstall
   chmod 755 msfinstall
   sudo rm -f /usr/share/keyrings/metasploit-framework.gpg
-  ./msfinstall
+  yes | ./msfinstall > /dev/null 2>&1 || true
+  yes | msfdb init > /dev/null 2>&1 || true
+"'
+
+sudo -u $USER bash -c 'bash -lc "
+  sudo snap install searchsploit
 "'
 
 sudo -u $USER bash -c 'bash -lc "
