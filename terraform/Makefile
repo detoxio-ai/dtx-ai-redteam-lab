@@ -54,6 +54,14 @@ ssh:
 	@first_ip=$$(terraform -chdir=$(PROJECT_DIR) output -json public_ips | jq -r '.[0]'); \
 	ssh -i id_ed25519 -o IdentitiesOnly=yes dtx@$$first_ip
 
+# === RDP over SSH ===
+rdp-over-ssh:
+	@terraform -chdir=$(PROJECT_DIR) workspace select $(WORKSPACE) >/dev/null || terraform -chdir=$(PROJECT_DIR) workspace new $(WORKSPACE)
+	@first_ip=$$(terraform -chdir=$(PROJECT_DIR) output -json public_ips | jq -r '.[0]'); \
+	echo "Forwarding local port 3390 to remote RDP port 3389..."; \
+	echo "Then connect your RDP client to localhost:3390"; \
+	ssh -i id_ed25519 -o IdentitiesOnly=yes -L 3390:localhost:3389 dtx@$$first_ip
+
 ssh-all:
 	@terraform -chdir=$(PROJECT_DIR) workspace select $(WORKSPACE) >/dev/null || terraform -chdir=$(PROJECT_DIR) workspace new $(WORKSPACE)
 	@ips=$$(terraform -chdir=$(PROJECT_DIR) output -json public_ips | jq -r '.[]'); \

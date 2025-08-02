@@ -84,6 +84,8 @@ curl -fsSL https://ollama.com/install.sh | sh
 systemctl enable ollama
 systemctl start ollama
 
+chown dtx:dtx -R /home/$USER/.*
+
 # === Pull Ollama Models ===
 ollama pull smollm2 || true
 ollama pull qwen3:0.6b || true
@@ -269,7 +271,7 @@ for script in install-reaper.sh; do
   fi
 done
 
-
+chown dtx:dtx -R /home/$USER
 
 
 # === Install Metasploit ===
@@ -293,6 +295,7 @@ sudo -u $USER bash -c 'bash -lc "
 
   # Install playwright and Chrome only
   echo \"📦 Installing Playwright (Chrome only)...\"
+  . \$HOME/.asdf/asdf.sh
   npm install playwright@latest
   npx playwright install chrome
 
