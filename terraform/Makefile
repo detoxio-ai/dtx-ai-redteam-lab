@@ -108,6 +108,17 @@ endif
 	@terraform -chdir=$(PROJECT_DIR) workspace delete $(WORKSPACE)
 
 
+run-all:
+ifndef CMD
+	$(error ❌ Please provide a command. Usage: make run-all CMD='uptime')
+endif
+	@terraform -chdir=$(PROJECT_DIR) workspace select $(WORKSPACE) >/dev/null || terraform -chdir=$(PROJECT_DIR) workspace new $(WORKSPACE)
+	@ips=$$(terraform -chdir=$(PROJECT_DIR) output -json public_ips | jq -r '.[]'); \
+	for ip in $$ips; do \
+		echo "🔧 Running on $$ip:"; \
+		ssh -i id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no dtx@$$ip "$(CMD)"; \
+	done
+
 # === One-time auth ===
 auth:
 	gcloud auth application-default login
